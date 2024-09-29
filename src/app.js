@@ -1,27 +1,65 @@
 const express = require("express");
-
+const connectDB = require("./config/database");
 const app = express();
+const User = require("./models/user");
+
+app.post("/signup",async(req,res) => {
+const userObj = {
+    firstName:"Prashant",
+    lastName:"Shinde",
+    emailId:"prashant@gmail.com",
+    password:"prashant@123"
+}
+
+// Creating the new instance of the user model
+
+const user = new User(userObj);
+
+
+// All mongoose functions are retuning promises
+
+try{
+    await user.save();
+    res.send("User Added Successfully");
+}catch(err){
+    res.status(400).send("Error Saving the user:" + err.message);
+}
+
+})
+
+connectDB()
+.then(() => {
+    console.log("Database connection established");
+    app.listen(3000, () => {
+        console.log("Server is successfully listening on port 3000...");
+    });
+})
+.catch(() => {
+    console.error("Database cannot be connected");
+});
+
+
 
 // MiddleWares Code
-const {adminAuth,userAuth} = require("./middlewares/auth");
+// const {adminAuth,userAuth} = require("./middlewares/auth");
 
-app.use("/admin", adminAuth);
+// app.use("/admin", adminAuth);
 
-app.get("/user/login",(req,res) => {
-    res.send("Login User");
-})
+// app.get("/user/login",(req,res) => {
+//     res.send("Login User");
+// })
 
-app.get("/user",userAuth,(req,res) => {
-    res.send("User Data Sent");
-})
+// app.get("/user",userAuth,(req,res) => {
+//     res.send("User Data Sent");
+// })
 
-app.get("/admin/getAllData",(req,res) => {
-    res.send("All Data Sent");
-})
+// app.get("/admin/getAllData",(req,res) => {
+//     res.send("All Data Sent");
+// })
 
-app.get("/admin/deleteUser",(req,res) => {
-    res.send("Deleted A User");
-})
+// app.get("/admin/deleteUser",(req,res) => {
+//     res.send("Deleted A User");
+// })
 // -----MiddleWares Code End --------
 
 
@@ -77,6 +115,6 @@ app.get("/admin/deleteUser",(req,res) => {
 //     res.send("Hello from the Dashboard!");
 // })
 
-app.listen(3000, () => {
-    console.log("Server is successfully listening on port 3000...");
-});
+// app.listen(3000, () => {
+//     console.log("Server is successfully listening on port 3000...");
+// });
