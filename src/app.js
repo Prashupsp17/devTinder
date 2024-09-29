@@ -3,7 +3,10 @@ const connectDB = require("./config/database");
 const app = express();
 const User = require("./models/user");
 
+app.use(express.json());
+
 app.post("/signup",async(req,res) => {
+    // console.log(req.body);
 const userObj = {
     firstName:"Prashant",
     lastName:"Shinde",
@@ -13,7 +16,7 @@ const userObj = {
 
 // Creating the new instance of the user model
 
-const user = new User(userObj);
+const user = new User(req.body);
 
 
 // All mongoose functions are retuning promises
