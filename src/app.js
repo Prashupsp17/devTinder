@@ -5,44 +5,44 @@ const User = require("./models/user");
 
 app.use(express.json());
 
-app.post("/signup",async(req,res) => {
+app.post("/signup", async (req, res) => {
     // console.log(req.body);
-const userObj = {
-    firstName:"Prashant",
-    lastName:"Shinde",
-    emailId:"prashant@gmail.com",
-    password:"prashant@123"
-}
+    const userObj = {
+        firstName: "Prashant",
+        lastName: "Shinde",
+        emailId: "prashant@gmail.com",
+        password: "prashant@123"
+    }
 
-// Creating the new instance of the user model
+    // Creating the new instance of the user model
 
-const user = new User(req.body);
+    const user = new User(req.body);
 
 
-// All mongoose functions are retuning promises
+    // All mongoose functions are retuning promises
 
-try{
-    await user.save();
-    res.send("User Added Successfully");
-}catch(err){
-    res.status(400).send("Error Saving the user:" + err.message);
-}
+    try {
+        await user.save();
+        res.send("User Added Successfully");
+    } catch (err) {
+        res.status(400).send("Error Saving the user:" + err.message);
+    }
 
 })
 
 // For One user
 
-app.get("/user",async (req,res) => {
+app.get("/user", async (req, res) => {
     const userEmail = req.body.emailId;
     // FindOne
-    try{
-        const user = await User.findOne({emailId:userEmail});
-        if(!user){
+    try {
+        const user = await User.findOne({ emailId: userEmail });
+        if (!user) {
             res.status(404).send("User not found");
-        }else{
+        } else {
             res.send(user);
         }
-       
+
     }
 
     // try{
@@ -53,34 +53,59 @@ app.get("/user",async (req,res) => {
     //         res.send(users);
     //     }
     // }
-    catch(err){
+    catch (err) {
         res.status(404).send("Something went wrong");
     }
 
 })
 
+app.patch("/user", async (req, res) => {
+    const userId = req.body.userId;
+    const data = req.body;
+    console.log(data);
+
+    try {
+        await User.findByIdAndUpdate({ _id: userId }, data);
+        res.send("User Updaed Successfully");
+    } catch (err) {
+res.send(400).send("Something went wrong");
+    }
+})
+app.delete("/user", async (req, res) => {
+    const userId = req.body.userId;
+
+    try {
+        const user = await User.findByIdAndDelete(userId);
+        res.send("User deleted succesfully");
+
+    } catch (err) {
+        res.status(400).send("Something Went wrong");
+
+    }
+})
+
 // Feed API - GET/feed get all the users from the database
 
-app.get("/feed",async (req,res) => {
- try{
-    const users = await User.find({});
-    res.send(users);
+app.get("/feed", async (req, res) => {
+    try {
+        const users = await User.find({});
+        res.send(users);
 
- }catch(err){
-    res.status(404).send("Something went wrong");
- }
+    } catch (err) {
+        res.status(404).send("Something went wrong");
+    }
 });
 
 connectDB()
-.then(() => {
-    console.log("Database connection established");
-    app.listen(3000, () => {
-        console.log("Server is successfully listening on port 3000...");
+    .then(() => {
+        console.log("Database connection established");
+        app.listen(3000, () => {
+            console.log("Server is successfully listening on port 3000...");
+        });
+    })
+    .catch(() => {
+        console.error("Database cannot be connected");
     });
-})
-.catch(() => {
-    console.error("Database cannot be connected");
-});
 
 
 
@@ -132,11 +157,11 @@ connectDB()
 // )
 
 // app.get("/user/:userId/:name/:password", (req,res) => {
-//     res.send({firstname:"Prashant",lastname:"shinde"}); 
+//     res.send({firstname:"Prashant",lastname:"shinde"});
 // })
 
 // app.get("/user", (req,res) => {
-//     res.send({firstname:"Prashant",lastname:"shinde"}); 
+//     res.send({firstname:"Prashant",lastname:"shinde"});
 // })
 
 // app.post("/user", (req,res) => {
