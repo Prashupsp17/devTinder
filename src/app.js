@@ -2,26 +2,32 @@ const express = require("express");
 const connectDB = require("./config/database");
 const app = express();
 const User = require("./models/user");
+const {validateSignUpData} = require("./utils/validation");
+const bcyrpt = require("bcrypt");
 
 app.use(express.json());
 
+validateSignUpData
+
 app.post("/signup", async (req, res) => {
-    // console.log(req.body);
-    const userObj = {
-        firstName: "Prashant",
-        lastName: "Shinde",
-        emailId: "prashant@gmail.com",
-        password: "prashant@123"
-    }
-
-    // Creating the new instance of the user model
-
-    const user = new User(req.body);
+    // Validation of data
+    
+    // const user = new User(req.body);
 
 
-    // All mongoose functions are retuning promises
 
     try {
+        validateSignUpData(req);
+        const {firstName,lastName,emailId,password} = req.body;
+
+        const passwordHash = await bcyrpt.hash(password,10);
+
+        const user = new User({
+            firstName,
+            lastName,
+            emailId,
+            password:passwordHash,
+        })
         await user.save();
         res.send("User Added Successfully");
     } catch (err) {
@@ -29,6 +35,54 @@ app.post("/signup", async (req, res) => {
     }
 
 })
+
+app.post("/login",async(req,res) => {
+    try{
+
+        const {emailId,password} = req.body;
+
+        const user = await User.findOne({emailId:emailId});
+
+        if(!user){
+            throw new Error("Invalid Credentials");
+        }
+        const isPasswordValid =  await bcyrpt.compare(password,user.password);
+
+        if(isPasswordValid){
+            res.send("Login successfully");
+        }else{
+            throw new Error("Invalid Credentials");
+        }
+
+    }catch(err){
+        res.status(400).send("ERROR :" + err.message );
+    }
+})
+
+// app.post("/signup", async (req, res) => {
+//     // console.log(req.body);
+//     const userObj = {
+//         firstName: "Prashant",
+//         lastName: "Shinde",
+//         emailId: "prashant@gmail.com",
+//         password: "prashant@123"
+//     }
+
+//     // Creating the new instance of the user model
+
+//     const user = new User(req.body);
+
+
+//     // All mongoose functions are retuning promises
+
+//     try {
+//         await user.save();
+//         res.send("User Added Successfully");
+//     } catch (err) {
+//         res.status(400).send("Error Saving the user:" + err.message);
+//     }
+
+// })
 
 // For One user
 
