@@ -1,63 +1,24 @@
 const express = require("express");
 const connectDB = require("./config/database");
 const app = express();
-const User = require("./models/user");
-const {validateSignUpData} = require("./utils/validation");
-const bcyrpt = require("bcrypt");
+
+
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+
 
 app.use(express.json());
+app.use(cookieParser());
 
-validateSignUpData
+const authRouter = require("./routes/auth");
+const profileRouter = require("./routes/profile");
+// const requestRouter = require("./routes/request");
 
-app.post("/signup", async (req, res) => {
-    // Validation of data
-    
-    // const user = new User(req.body);
+app.use("/",authRouter);
+app.use("/",profileRouter);
 
 
 
-    try {
-        validateSignUpData(req);
-        const {firstName,lastName,emailId,password} = req.body;
-
-        const passwordHash = await bcyrpt.hash(password,10);
-
-        const user = new User({
-            firstName,
-            lastName,
-            emailId,
-            password:passwordHash,
-        })
-        await user.save();
-        res.send("User Added Successfully");
-    } catch (err) {
-        res.status(400).send("Error Saving the user:" + err.message);
-    }
-
-})
-
-app.post("/login",async(req,res) => {
-    try{
-
-        const {emailId,password} = req.body;
-
-        const user = await User.findOne({emailId:emailId});
-
-        if(!user){
-            throw new Error("Invalid Credentials");
-        }
-        const isPasswordValid =  await bcyrpt.compare(password,user.password);
-
-        if(isPasswordValid){
-            res.send("Login successfully");
-        }else{
-            throw new Error("Invalid Credentials");
-        }
-
-    }catch(err){
-        res.status(400).send("ERROR :" + err.message );
-    }
-})
 
 // app.post("/signup", async (req, res) => {
 //     // console.log(req.body);
