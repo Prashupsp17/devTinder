@@ -12,11 +12,11 @@ requestRouter.post("/request/send/:status/:toUserId",
 
         try {
 
-            const fromUserId = req.user_id;
+            const fromUserId = req.user._id;
             const toUserId = req.params.toUserId;
             const status = req.params.status;
 
-            const allowedStatus = ["ignored", "accepted"];
+            const allowedStatus = ["ignored", "interested"];
 
             if (!allowedStatus.includes(status)) {
                 return res
@@ -52,7 +52,7 @@ requestRouter.post("/request/send/:status/:toUserId",
             const data = await connectionRequest.save();
 
             res.json({
-                message: req.user.firstName + " is " + status + "in" + toUser.firstName,
+                message: req.user.firstName + " is " + status + "in"  +  toUser.firstName,
                 data
             });
 
@@ -73,7 +73,7 @@ requestRouter.post("/request/review/:status/:requestId",
 
             const allowedStatus = ["accepted", "rejected"];
             if (!allowedStatus.includes(status)) {
-                return res.send(400).json({ message: "Status not allowed!" });
+                return res.status(400).json({ message: "Status not allowed!" });
             }
 
             const connectionRequest = await ConnectionRequest.findOne({
@@ -91,6 +91,8 @@ requestRouter.post("/request/review/:status/:requestId",
             connectionRequest.status = status;
 
             const data = await connectionRequest.save();
+
+            res.json({message:"Connection Request" + status,data});
         } catch (err) {
             res.status(400).send("ERROR" + err.message);
         }
